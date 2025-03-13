@@ -2,8 +2,9 @@
 <html>
   <head>
     <title></title>
-    <style>
-    </style>
+    <!-- Add Modal Styling -->
+    <link rel="stylesheet" href="styles.css">
+
   </head>
   <body>
     <p> Workout Journal</p>
@@ -25,6 +26,20 @@
 
 
     <div class="js-workout-log"></div>
+
+   <!-- Blank Edit Modal -->
+  <div id="editWorkoutModal" class="modal">
+    <div class="modal-content">
+        <h2>Edit Workout</h2>
+        <input type="date" id="editWorkoutDate">
+        <div id="editWorkoutEntries"></div>
+        <button onclick="saveEditedWorkout()">Save Changes</button>
+        <button onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+
+
+
     
     
     <script src="journal.js"> </script>

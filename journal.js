@@ -22,6 +22,9 @@ function addWorkout() {
 
     // Save back to localStorage
     localStorage.setItem("workouts", JSON.stringify(workouts));
+    document.querySelector(".js-workout-entry-date").value = "";
+    document.querySelector(".js-workout-entry").innerHTML = "";
+    addNewEntryLine();
     renderWorkouts();
 }
 
@@ -44,8 +47,79 @@ function addNewEntryLine(){
     workoutEntryContainer.appendChild(newEntry);
 }
 
-function delWorkoutEntry() {
+function delWorkoutEntry(id) {
+    let workouts = JSON.parse(localStorage.getItem("workouts")) || [];
+    if (workouts.length === 0) {
+        return;
+    }
+    else{
+        workouts.splice(id, 1);
+    }
+    localStorage.setItem("workouts", JSON.stringify(workouts));
+    renderWorkouts();
+}
 
+//edit functions:
+//Can refactor this so that the add workout process tobegin with is the same as the edit and save
+function openEditModal(index) {
+    let workouts = JSON.parse(localStorage.getItem("workouts")) || [];
+    const selectedWorkout = workouts[index];
+
+    // Set date in modal
+    document.getElementById("editWorkoutDate").value = selectedWorkout.date;
+
+    // Populate workout details
+    const editWorkoutEntries = document.getElementById("editWorkoutEntries");
+    editWorkoutEntries.innerHTML = ""; // Clear previous entries
+
+    selectedWorkout.workoutData.forEach((entry, entryIndex) => {
+        const newEntry = document.createElement("div");
+        newEntry.classList.add("edit-workout-entry");
+
+        newEntry.innerHTML = `
+          <input placeholder="Reps" value="${entry.Reps || ''}" data-key="Reps" data-index="${entryIndex}">
+          <input placeholder="Distance" value="${entry.Distance || ''}" data-key="Distance" data-index="${entryIndex}">
+          <input placeholder="Pace" value="${entry.Pace || ''}" data-key="Pace" data-index="${entryIndex}">
+          <input placeholder="Notes" value="${entry.Notes || ''}" data-key="Notes" data-index="${entryIndex}">
+        `;
+
+        editWorkoutEntries.appendChild(newEntry);
+    });
+
+    // Store index for saving
+    document.getElementById("editWorkoutModal").dataset.index = index;
+
+    document.getElementById("editWorkoutModal").style.display = "block";
+}
+
+function closeEditModal() {
+    document.getElementById("editWorkoutModal").style.display = "none";
+}
+
+function saveEditedWorkout() {
+    let workouts = JSON.parse(localStorage.getItem("workouts"))|| [];
+
+    const modal = document.getElementById("editWorkoutModal");
+    const index = modal.dataset.index;
+    const updatedDate = document.getElementById("editWorkoutDate").value;
+
+    const updatedWorkoutData = [];
+    document.querySelectorAll("#editWorkoutEntries .edit-workout-entry").forEach(entryDiv => {
+        const inputs = entryDiv.querySelectorAll("input");
+        const entry = {};
+        inputs.forEach(input => {
+            entry[input.getAttribute("data-key")] = input.value;
+        });
+        updatedWorkoutData.push(entry);
+    });
+    workouts[index] = {
+        date: updatedDate,
+        workoutData: updatedWorkoutData
+    };
+    localStorage.setItem("workouts", JSON.stringify(workouts));
+
+    closeEditModal();
+    renderWorkouts();
 }
 
 
@@ -58,11 +132,11 @@ function renderWorkouts() {
     }
     let res = "<h3>Past Workouts</h3>"; //template string to create our grid of past workouts for now
     workouts.forEach((workout, index) => {
-        console.log(workout);
+        // console.log(workout);
         const {date, workoutData} = workout;
-        console.log(date,workoutData);
+        // console.log(date,workoutData);
         res += `<div class="workout-entry">
-                    <h4>Workout ${date}<button>Edit</button><button>Delete</button></h4> 
+                    <h4>Workout ${date}<button onclick="openEditModal(${index})" class="edit-button">Edit</button><button onclick="delWorkoutEntry(${index})" class="delete-button">Delete</button></h4> 
                     <ul>`;
         
         workoutData.forEach(entry => {
